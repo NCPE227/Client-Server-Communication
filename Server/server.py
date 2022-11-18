@@ -41,6 +41,8 @@ while True:
                 
                 f.write(bytes_read) #write the received bytes to a file with the same name
                 progress.update(len(bytes_read)) #update the progress bar
+                if bytes_read == filesize:
+                    break
         
         ack = 'finished uploading'
         connection.send(ack.encode())
