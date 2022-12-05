@@ -13,6 +13,7 @@ PORT = 65432  #server port
 server = socket.socket()
 server.bind((HOST, PORT)) #bind server host and port
 
+#Function to handle client requests
 def CLIENT_HANDLER(connection, address):
     print(f"{address} is connected.")
 
@@ -77,6 +78,7 @@ def CLIENT_HANDLER(connection, address):
 
     connection.close() #close server
 
+#Function to start the server and assign incoming connections to threads
 def start():
     server.listen(5)
     print(f"Listening as {HOST}:{PORT}") #printout to confirm connection
