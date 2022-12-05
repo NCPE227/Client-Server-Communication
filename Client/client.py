@@ -22,23 +22,15 @@ def UPLOAD(client, filename, filesize):
     #Start sending the file
     progress = tqdm(range(filesize), f'Sending {filename}', unit='B', unit_scale=True, unit_divisor=1024, mininterval=0) 
     with open(filename, 'rb') as f:
-        while True:
-            #Read bytes from the file
-            bytes_read = f.read(BUFFER_SIZE)
-            if not bytes_read: #no more bytes to read
-                break
+        #Read bytes from the file
+        bytes_read = f.read(BUFFER_SIZE)
                 
-            client.sendall(bytes_read) #send bytes from client to server
+        client.sendall(bytes_read) #send bytes from client to server
                 
-            #Update the progress bar
-            progress.update(len(bytes_read))
+        #Update the progress bar
+        progress.update(len(bytes_read))
+    progress.close()
 
-            if bytes_read == filesize:
-                break
-
-    #Stops the bar from repeating itself
-    progress = 0
-        
     #Receive an acknowledgement message
     received = client.recv(BUFFER_SIZE).decode()
     print(received)
@@ -53,25 +45,20 @@ def DOWNLOAD(client, filename):
     request, filename, filesize = received.split(SEPARATOR)
     filename = os.path.basename(filename) #Remove absolute path
     filesize = int(filesize) #integer conversion for filesize, due to encoding/decoding
-        
-    with open(filename, 'wb') as f:
-        #Create a server side progress bar
-        progress = tqdm(range(filesize), f'Receiving {filename}', unit='B', unit_scale=True, unit_divisor=1024, mininterval=0)
-        while True:
-            #Receive 1024 bytes from the client
-            bytes_read = client.recv(BUFFER_SIZE)
-            if not bytes_read:    
-                break #file has been read when no more bytes are transmitted
-                
-            f.write(bytes_read) #write the received bytes to a file with the same name
-            progress.update(len(bytes_read)) #update the progress bar
-    
-        #Stops the bar from repeating itself
-        progress = 0
 
-        #Receive an acknowledgement message
-        received = client.recv(BUFFER_SIZE).decode()
-        print(received)
+    #Create a server side progress bar
+    progress = tqdm(range(filesize), f'Receiving {filename}', unit='B', unit_scale=True, unit_divisor=1024, mininterval=0)    
+    with open(filename, 'wb') as f:
+        #Receive 1024 bytes from the client
+        bytes_read = client.recv(BUFFER_SIZE)
+                
+        f.write(bytes_read) #write the received bytes to a file with the same name
+        progress.update(len(bytes_read)) #update the progress bar
+    progress.close()
+
+    #Receive an acknowledgement message
+    received = client.recv(BUFFER_SIZE).decode()
+    print(received)
 
 #Function to show directory
 def DIR():
