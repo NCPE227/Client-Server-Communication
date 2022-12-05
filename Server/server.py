@@ -44,9 +44,9 @@ while True:
                 progress.update(len(bytes_read)) #update the progress bar
                 if bytes_read == filesize:
                     break
-        
-        ack = 'finished uploading'
-        connection.send(ack.encode())
+        break
+        #ack = 'finished uploading'
+        #connection.send(ack.encode())
 
     elif request == 'download': #download will send a file to the client and allow it to write
         print(f'Received \'{request}\' request with filename \'{filename}\'')
@@ -61,18 +61,24 @@ while True:
             while True:
                 #Read bytes from the file
                 bytes_read = f.read(BUFFER_SIZE)
-                if not bytes_read: #no more bytes to read
+                if bytes_read == 0: #no more bytes to read
                     break
                 
                 connection.sendall(bytes_read) #send bytes from server to client
                 
                 #Update the progress bar
                 progress.update(len(bytes_read))
+                
+                if progress == 100:
+                    progress.update(len(bytes_read))
+                    break
+            
             #Cleanse progress bar
             progress = 0
 
-        ack = 'finished downloading'
-        connection.send(ack.encode())
+        break
+        #ack = 'finished downloading'
+        #connection.send(ack.encode())
 
     else:
         server.send('Sorry, that was a bad request. Please try again.')
